@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8">
+  <title>main.py</title>
+  <link rel="stylesheet" href="pycco.css">
+</head>
+<body>
+<div id="background"></div>
+<div id='container'>
+  <div class='section'>
+    <div class='docs'><h1>main.py</h1></div>
+  </div>
+  <div class='clearall'>
+  <div class='section' id='section-0'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-0'>#</a>
+      </div>
+      <p>This is a code challenge for LocBox. It list out room availability in aspecified
+city</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="kn">import</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">getopt</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span> <span class="k">as</span> <span class="n">DT</span>
+<span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">import</span> <span class="nn">requests</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">pymongo</span>
+
+<span class="n">DT_FORMAT</span> <span class="o">=</span> <span class="s">&quot;%m/</span><span class="si">%d</span><span class="s">/%Y&quot;</span>
+<span class="n">QUERY_DAYS</span> <span class="o">=</span> <span class="mi">7</span>
+
+<span class="n">mongo</span> <span class="o">=</span> <span class="n">pymongo</span><span class="o">.</span><span class="n">MongoClient</span><span class="p">(</span><span class="s">&#39;localhost&#39;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">)</span>
+<span class="n">db</span> <span class="o">=</span> <span class="n">mongo</span><span class="p">[</span><span class="s">&#39;airbnb&#39;</span><span class="p">]</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-1'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-1'>#</a>
+      </div>
+      <p>Room holds essential attributes for a room. Upon instantiation a new
+entry will be inserted to the database</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">class</span> <span class="nc">Room</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-2'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-2'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-3'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-3'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">id_</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Room</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">id_</span> <span class="o">=</span> <span class="n">id_</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">available_dates</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">db</span><span class="o">.</span><span class="n">rooms</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">db__repr__</span><span class="p">())</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-4'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-4'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">add_available_date</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">date</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">available_dates</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">date</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-5'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-5'>#</a>
+      </div>
+      <p>Appearenr MongoDB doesn't conver datetime.date naturally. It has to be
+converted to datetime.datetime</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="n">db</span><span class="o">.</span><span class="n">rooms</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+                <span class="p">{</span><span class="s">&#39;_id&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">id_</span><span class="p">},</span>
+                <span class="p">{</span><span class="s">&#39;$addToSet&#39;</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="s">&#39;available_dates&#39;</span><span class="p">:</span> <span class="n">DT</span><span class="p">(</span><span class="n">date</span><span class="o">.</span><span class="n">year</span><span class="p">,</span> <span class="n">date</span><span class="o">.</span><span class="n">month</span><span class="p">,</span> <span class="n">date</span><span class="o">.</span><span class="n">day</span><span class="p">)</span>
+                    <span class="p">}</span>
+                <span class="p">}</span>
+            <span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-6'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-6'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="s">u&quot;Room ID: </span><span class="si">%s</span><span class="s"> </span><span class="se">\n</span><span class="s">Room Name: </span><span class="si">%s</span><span class="s"> </span><span class="se">\n</span><span class="s">Availability: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> \
+               <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id_</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">avail</span><span class="p">))</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s">&#39;utf-8&#39;</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-7'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-7'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s">(</span><span class="si">%r</span><span class="s">)&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-8'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-8'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">db__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span>
+                <span class="s">&#39;_id&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">id_</span><span class="p">,</span>
+                <span class="s">&#39;name&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                <span class="s">&#39;available_dates&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">available_dates</span>
+                <span class="p">}</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-9'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-9'>#</a>
+      </div>
+      <p>Query DB for room availability in between 2 sepcified query_dates</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">query_db</span><span class="p">(</span><span class="n">start_date</span><span class="p">,</span> <span class="n">end_date</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-10'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-10'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="n">query_dates</span> <span class="o">=</span> <span class="p">[</span><span class="n">start_date</span> <span class="o">+</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="n">x</span><span class="p">)</span> \
+                  <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">((</span><span class="n">end_date</span> <span class="o">-</span> <span class="n">start_date</span><span class="p">)</span><span class="o">.</span><span class="n">days</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span>
+
+    <span class="n">rv</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">rooms</span><span class="o">.</span><span class="n">find</span><span class="p">({</span>
+        <span class="s">&#39;available_dates&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s">&#39;$all&#39;</span><span class="p">:</span> <span class="n">query_dates</span>
+        <span class="p">}</span>
+        <span class="p">})</span>
+
+    <span class="k">print</span> <span class="s">&#39;Rooms available from </span><span class="si">%s</span><span class="s"> to </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">start_date</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="n">DT_FORMAT</span><span class="p">),</span> \
+           <span class="n">end_date</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="n">DT_FORMAT</span><span class="p">))</span>
+
+    <span class="k">for</span> <span class="n">room</span> <span class="ow">in</span> <span class="n">rv</span><span class="p">:</span>
+        <span class="k">print</span> <span class="s">&#39;Name: </span><span class="si">%s</span><span class="s">, ID: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">room</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">],</span> <span class="n">room</span><span class="p">[</span><span class="s">&#39;_id&#39;</span><span class="p">])</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-11'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-11'>#</a>
+      </div>
+      <p>Deletes every record created in the database</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">teardown</span><span class="p">():</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-12'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-12'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="n">rv</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">rooms</span><span class="o">.</span><span class="n">remove</span><span class="p">()</span>
+    <span class="k">print</span> <span class="s">&#39;Teardown: </span><span class="si">%s</span><span class="s"> records in DB are removed&#39;</span> <span class="o">%</span> <span class="n">rv</span><span class="p">[</span><span class="s">&#39;n&#39;</span><span class="p">]</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-13'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-13'>#</a>
+      </div>
+      <p>Gets room availability for a specified city from the next 7 days</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">get_airbnb_data</span><span class="p">(</span><span class="n">city</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-14'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-14'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="n">today_date</span> <span class="o">=</span> <span class="n">DT</span><span class="o">.</span><span class="n">utcnow</span><span class="p">()</span><span class="o">.</span><span class="n">date</span><span class="p">()</span>
+    <span class="n">query_dates</span> <span class="o">=</span> <span class="p">[(</span><span class="n">today_date</span> <span class="o">+</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="n">x</span><span class="p">))</span> \
+                  <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">QUERY_DAYS</span><span class="p">)]</span>
+
+    <span class="n">prop_dict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">checkin_date</span> <span class="ow">in</span> <span class="n">query_dates</span><span class="p">:</span>
+        <span class="n">checkout_date</span> <span class="o">=</span> <span class="n">checkin_date</span> <span class="o">+</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">http_url</span> <span class="o">=</span> <span class="s">&#39;https://www.airbnb.com/search/ajax_get_results?location=&#39;</span> <span class="o">+</span> \
+                    <span class="n">city</span> <span class="o">+</span> <span class="s">&#39;&amp;checkin=&#39;</span> <span class="o">+</span> <span class="n">checkin_date</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="n">DT_FORMAT</span><span class="p">)</span> <span class="o">+</span> \
+                    <span class="s">&#39;&amp;checkout=&#39;</span> <span class="o">+</span> <span class="n">checkout_date</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="n">DT_FORMAT</span><span class="p">)</span>
+
+        <span class="k">print</span> <span class="s">&quot;Getting available properties with query: &quot;</span><span class="p">,</span>
+        <span class="k">print</span> <span class="n">http_url</span>
+
+        <span class="n">results</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">http_url</span><span class="p">)</span>
+        <span class="n">json_result</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">results</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+
+        <span class="k">print</span> <span class="s">&quot;</span><span class="si">%d</span><span class="s"> results are returned&quot;</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">json_result</span><span class="p">[</span><span class="s">&#39;properties&#39;</span><span class="p">])</span>
+
+        <span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">json_result</span><span class="p">[</span><span class="s">&#39;properties&#39;</span><span class="p">]:</span>
+            <span class="n">prop_id</span> <span class="o">=</span> <span class="n">prop</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;id&#39;</span><span class="p">)</span>
+            <span class="n">prop_name</span> <span class="o">=</span> <span class="n">prop</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;name&#39;</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">prop_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">prop_dict</span><span class="p">:</span>
+                <span class="n">prop_dict</span><span class="p">[</span><span class="n">prop_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">Room</span><span class="p">(</span><span class="n">prop_id</span><span class="p">,</span> <span class="n">prop_name</span><span class="p">)</span>
+                <span class="n">prop_dict</span><span class="p">[</span><span class="n">prop_id</span><span class="p">]</span><span class="o">.</span><span class="n">add_available_date</span><span class="p">(</span><span class="n">checkin_date</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">prop_dict</span><span class="p">[</span><span class="n">prop_id</span><span class="p">]</span><span class="o">.</span><span class="n">add_available_date</span><span class="p">(</span><span class="n">checkin_date</span><span class="p">)</span>
+
+    <span class="k">print</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s"> of unique properties retrieved&quot;</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">prop_dict</span><span class="p">)</span>
+
+    <span class="n">prop_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">v</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">prop_dict</span><span class="o">.</span><span class="n">iteritems</span><span class="p">()]</span>
+    <span class="n">max_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">prop_names</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="nb">len</span><span class="p">))</span>
+
+    <span class="n">space</span> <span class="o">=</span> <span class="mi">7</span>
+    <span class="k">print</span> <span class="s">&#39;-&#39;</span> <span class="o">*</span> <span class="p">((</span><span class="n">space</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">QUERY_DAYS</span> <span class="o">+</span> <span class="n">max_len</span><span class="p">)</span>
+    <span class="k">print</span> <span class="s">&#39;|&#39;</span> <span class="o">+</span> <span class="s">&#39; &#39;</span> <span class="o">*</span> <span class="n">max_len</span> <span class="o">+</span> <span class="s">&#39;|&#39;</span><span class="p">,</span>
+
+    <span class="k">print</span> <span class="s">&#39;|&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">date</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s">&#39;%m/</span><span class="si">%d</span><span class="s">&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">center</span><span class="p">(</span><span class="n">space</span><span class="p">)</span> <span class="k">for</span> <span class="n">date</span> <span class="ow">in</span> <span class="n">query_dates</span><span class="p">)</span>
+
+    <span class="k">print</span> <span class="s">&#39;-&#39;</span> <span class="o">*</span> <span class="p">((</span><span class="n">space</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">QUERY_DAYS</span> <span class="o">+</span> <span class="n">max_len</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">id_</span><span class="p">,</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">prop_dict</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+        <span class="k">print</span> <span class="s">&#39;|&#39;</span> <span class="o">+</span> <span class="n">prop</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">center</span><span class="p">(</span><span class="n">max_len</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;|&#39;</span><span class="p">,</span>
+
+        <span class="k">for</span> <span class="n">date</span> <span class="ow">in</span> <span class="n">query_dates</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">date</span> <span class="ow">in</span> <span class="n">prop</span><span class="o">.</span><span class="n">available_dates</span><span class="p">:</span>
+                <span class="k">print</span> <span class="s">&#39;&#39;</span><span class="o">.</span><span class="n">center</span><span class="p">(</span><span class="n">space</span><span class="p">),</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">print</span> <span class="s">&#39;x&#39;</span><span class="o">.</span><span class="n">center</span><span class="p">(</span><span class="n">space</span><span class="p">),</span>
+        <span class="k">print</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-15'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-15'>#</a>
+      </div>
+      <p>Usage:</p>
+<p>-s, <code>start date</code>
+-e, <code>end date</code>
+single arg <code>city name</code></p>
+<p>if -s or -e is omitted the program will assume a 7 days duration. Date is in
+UTC and have to be complete.</p>
+<p>Example:</p>
+<pre><code>-s 08/04/2013 -e 08/07/2013 SF
+</code></pre>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">main</span><span class="p">():</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-16'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-16'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">try</span><span class="p">:</span>
+        <span class="n">opts</span><span class="p">,</span> <span class="n">args</span> <span class="o">=</span> <span class="n">getopt</span><span class="o">.</span><span class="n">getopt</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="s">&#39;hs:e:&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;help&#39;</span><span class="p">])</span>
+    <span class="k">except</span> <span class="n">getopt</span><span class="o">.</span><span class="n">error</span><span class="p">,</span> <span class="n">msg</span><span class="p">:</span>
+        <span class="k">print</span> <span class="n">msg</span>
+        <span class="k">print</span> <span class="s">&quot;for help use --help&quot;</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+
+    <span class="n">start_date</span> <span class="o">=</span> <span class="n">end_date</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="k">for</span> <span class="n">o</span><span class="p">,</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">opts</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">o</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&#39;-h&#39;</span><span class="p">,</span> <span class="s">&#39;--help&#39;</span><span class="p">):</span>
+            <span class="k">print</span> <span class="n">main</span><span class="o">.</span><span class="n">__doc__</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">o</span> <span class="o">==</span> <span class="s">&#39;-s&#39;</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">start_date</span> <span class="o">=</span> <span class="n">DT</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">DT_FORMAT</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                <span class="k">print</span> <span class="s">&quot;Bad date format&quot;</span>
+                <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">o</span> <span class="o">==</span> <span class="s">&#39;-e&#39;</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">end_date</span> <span class="o">=</span> <span class="n">DT</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">DT_FORMAT</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                <span class="k">print</span> <span class="s">&quot;Bad date format&quot;</span>
+                <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">end_date</span> <span class="o">&lt;</span> <span class="n">start_date</span><span class="p">:</span>
+        <span class="k">print</span> <span class="s">&quot;End date cannot be bigger than start date&quot;</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">start_date</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="n">end_date</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">start_date</span> <span class="o">=</span> <span class="n">DT</span><span class="o">.</span><span class="n">utcnow</span><span class="p">()</span><span class="o">.</span><span class="n">date</span><span class="p">()</span>
+        <span class="n">start_date</span> <span class="o">=</span> <span class="n">DT</span><span class="p">(</span><span class="n">start_date</span><span class="o">.</span><span class="n">year</span><span class="p">,</span> <span class="n">start_date</span><span class="o">.</span><span class="n">month</span><span class="p">,</span> <span class="n">start_date</span><span class="o">.</span><span class="n">day</span><span class="p">)</span>
+
+        <span class="n">end_date</span> <span class="o">=</span> <span class="p">(</span><span class="n">start_date</span> <span class="o">+</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="n">QUERY_DAYS</span><span class="p">))</span>
+        <span class="n">end_date</span> <span class="o">=</span> <span class="n">DT</span><span class="p">(</span><span class="n">end_date</span><span class="o">.</span><span class="n">year</span><span class="p">,</span> <span class="n">end_date</span><span class="o">.</span><span class="n">month</span><span class="p">,</span> <span class="n">end_date</span><span class="o">.</span><span class="n">day</span><span class="p">)</span>
+
+    <span class="n">city</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">city</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">print</span> <span class="s">&quot;Missing argument&quot;</span>
+        <span class="k">print</span> <span class="s">&quot;for help use --help&quot;</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+
+    <span class="k">print</span> <span class="s">&quot;Getting room availability for city of </span><span class="si">%s</span><span class="s"> from </span><span class="si">%s</span><span class="s"> to </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> \
+          <span class="p">(</span><span class="n">city</span><span class="p">,</span> <span class="n">start_date</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="n">DT_FORMAT</span><span class="p">),</span> <span class="n">end_date</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="n">DT_FORMAT</span><span class="p">))</span>
+
+    <span class="n">get_airbnb_data</span><span class="p">(</span><span class="n">city</span><span class="p">)</span>
+    <span class="n">query_db</span><span class="p">(</span><span class="n">start_date</span><span class="o">=</span><span class="n">start_date</span><span class="p">,</span> <span class="n">end_date</span><span class="o">=</span><span class="n">end_date</span><span class="p">)</span>
+    <span class="n">teardown</span><span class="p">()</span>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+
+</pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+</div>
+</body>

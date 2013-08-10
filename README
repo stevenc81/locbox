@@ -1,0 +1,28 @@
+# AirBnB City Room Availability
+
+## Installation
+
+### To run
+
+* pip install requests
+* pip install pymongo
+	* `ip`:127.0.0.1
+	* `port`: 27017
+
+### To develop
+
+* pip install pycco
+
+
+## Usage
+
+-s, `start date`
+-e, `end date`
+single arg `city name`
+
+if -s or -e is omitted the program will assume a 7 days duration. Date is in
+UTC and have to be complete.
+
+Example:
+
+    -s 08/04/2013 -e 08/07/2013 SF
